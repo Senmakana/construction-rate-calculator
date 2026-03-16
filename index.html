@@ -1,0 +1,187 @@
+<html>
+<head>
+    <title>construction rates application</title>
+    <style>
+        body {
+            font-family: "roboti" Sans-Serif;
+        }
+        select {
+            width: 100%;
+            height: 50px;
+            font-size: 20px;
+        }
+        input {
+            width: 100%;
+            height: 50px;
+            font-size: 20px;
+        }
+        h3 {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        section {
+            margin-top: 20px;
+            border-bottom: 2px grey solid;
+            border-top: 2px grey solid;
+            border-radius: 25px;
+            padding: 30px;
+        }
+        nav {
+            justify-content: space-between;
+        }
+        a {
+            text-align: center;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 12px;
+            margin-left: 15px;
+        }
+        button {
+            width: 100%;
+            height: 50px;
+            border: none;
+            border-radius: 15px;
+            background-color: blue;
+            display: block;
+            margin-top: 20px;
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+        label{
+            font-size: 15px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <section id="home-section">
+        <h1>BUILDING CONSTRUCTION RATES</h1>
+        <h2>Introduction</h2>
+        <p>
+            Welcome to the Construction Rate Calculator
+            This application is designed to help builders, contractors, and construction professionals quickly determine the cost of construction work per unit.
+            Many construction tasks such as blockwork, plastering, and other masonry works are commonly measured in square meters. Instead of estimating materials manually, this tool allows you to calculate the rate per square meter based on the materials used and their current prices.
+            With this tool you can:
+            Enter the block size you are using.
+            Specify the mix ratio of materials (such as cement and sand).
+            Input current material prices.
+            Automatically calculate the rate per square meter of the work.
+            The goal is to simplify calculations, reduce estimation errors, and help contractors make faster and more accurate cost decisions on site.
+        </p>
+        <nav>
+            <a href="#about-section">About the Developer</a>
+            <a href="#walling-section">wall</a>
+        </nav>
+    </section>
+    <section>
+        <h2>About Us</h2>
+        <p>
+            This application was developed by Eric Nyongesa, a trained architect with a strong interest in construction technology and practical site solutions.
+            Having studied architecture and worked closely with construction processes, Eric understands the everyday challenges contractors face when estimating materials and costs. To make these calculations easier and more accessible, he combines his knowledge of construction practices with his skills in programming using Python, HTML, CSS, and JavaScript.
+            The goal of this project is to create simple digital tools that help builders, contractors, and construction professionals save time, improve accuracy, and work more efficiently.
+        </p>
+        <a href="#home-section">home</a>
+    </section>
+    <script>
+        function convertStringListItemsToFloats(itemList) {
+            let floats = itemList.map(n => parseFloat(n));
+
+            console.log(floats);
+            return floats
+        }
+        function getInfoFromData(data, seperator) {
+            const dataList = data.split(seperator)
+            const info = convertStringListItemsToFloats(dataList)
+            return info
+        }
+        function getBlockMeasurements(block) {
+            return getInfoFromData(block, "x")
+        }
+        function getRatio(ratio) {
+            return getInfoFromData(ratio, ":")
+        }
+    </script>
+    <section id="walling-section">
+        <h2>BLOCK AND MORTA WALL PER M²</h2>
+        <h3>Building Block Sizes</h3>
+        <select id="blocks-select">
+            <option value="">choose building block size</option>
+            <option value="300x150x150">300x150x150</option>
+            <option value="360x180x180">360x180x180</option>
+            <option value="400x200x200">400x200x200</option>
+        </select>
+        <h3>Mortar Ratio</h3>
+        <select id="morta-select">
+            <option value="1:2">1:2</option>
+            <option value="1:3">1:3</option>
+            <option value="1:4">1:4</option>
+            <option value="1:5">1:5</option>
+        </select>
+        <h3>Block Price Per Piece</h3>
+        <input type="number" placeholder="65" id="block-price">
+        <h3>Cement price per Bag</h3>
+        <input id="cement-price-input" placeholder="850" type="number">
+        <h3>Sand Price Per Ton</h3>
+        <input id="sand-price-per-ton" placeholder="1350" type="number">
+        <h3>Labor percent of Material Cost</h3>
+        <input id="labor-text" placeholder="40" type="number">
+        <label id="wall-unit-cost-label"></label>
+        <button id="submit-btn" onclick="calculatewalling()">submit</button>
+        <a href="#home-section">home</a>
+    <script>
+        function calculatemix(volume,ratio,factor,cementPrice,sandPrice,ballastPrice=0){
+            const mix = getRatio(ratio);
+            const cementratio = mix[0];
+            const sandratio = mix[1];
+            const ballastRatio = mix[2]||0;
+            const ratioSum = cementratio+sandratio+ballastRatio;
+            
+            const dryVolume = volume*factor;
+            const cement= cementratio*dryVolume*28.96/ratioSum;
+            const sand = sandratio* dryVolume*1.8/ratioSum
+            const ballast = ballastRatio*dryVolume*2.2/ratioSum;
+            const cementCost = Math.ceil(cement*cementPrice);
+            const sandCost = Math.ceil(sandPrice*sand);
+            const ballastCost = Math.ceil(ballastPrice*ballast);
+            const materialCost = cementCost+sandCost+ballastCost;
+            return materialCost
+        }
+        function calculatewalling() {
+            const block = document.getElementById("blocks-select").value;
+            const morta = document.getElementById("morta-select").value;
+            const blockPrice = parseFloat(document.getElementById("block-price").value);
+            const cementPrice = parseFloat(document.getElementById("cement-price-input").value);
+            const sandPrice = parseFloat(document.getElementById("sand-price-per-ton").value);
+            const laborPercent = parseFloat(document.getElementById("labor-text").value);
+            const blocks = calculateBlock(block,blockPrice)
+            const mortaMix=calculatemix(
+                blocks[1],
+                morta,
+                1.3,
+                cementPrice,
+                sandPrice
+                )
+            const materialCost = mortaMix+blocks[0]
+            const laborCost = Math.ceil(materialCost*laborPercent/100)
+            unitCost = laborCost+materialCost
+            document.getElementById("wall-unit-cost-label").innerHTML=`WALLING COST PER SQUARE METER = ${unitCost}/=`}
+        function calculateBlock(block,price){
+            const blockMeasurements = getBlockMeasurements(block);
+            const lengthOfBlock = blockMeasurements[0];
+            const widthOfBlock = blockMeasurements[1];
+            const heightOfBlock = blockMeasurements[2];
+            const builtBlockLength = (lengthOfBlock+20)/1000;
+            const builtBlockHeight = (heightOfBlock+20)/1000;
+            const blockArea = builtBlockLength*builtBlockHeight;
+            const blocks = Math.ceil(1/blockArea)
+            const blockVolume = blocks*lengthOfBlock*widthOfBlock*heightOfBlock/1000000000;
+            const wallVolume = 1*widthOfBlock/1000;
+            const mortaVolume = wallVolume-blockVolume;
+            const cost = blocks*price;
+            return [cost,mortaVolume]
+        }
+    </script>
+    </section>
+</body>
+</html>
