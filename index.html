@@ -1,7 +1,11 @@
 <html>
 <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>construction rates application</title>
     <style>
+        * {
+    box-sizing: border-box;
+}
         body {
             font-family: "roboti" Sans-Serif;
         }
@@ -42,13 +46,13 @@
             height: 50px;
             border: none;
             border-radius: 15px;
-            background-color: blue;
+            background-color: grey;
             display: block;
             margin-top: 20px;
             margin-bottom: 20px;
             font-size: 20px;
         }
-        label{
+        label {
             font-size: 15px;
             font-weight: bold;
         }
@@ -72,6 +76,7 @@
         <nav>
             <a href="#about-section">About the Developer</a>
             <a href="#walling-section">wall</a>
+            <a href="#concrete-section">Concrete</a>
         </nav>
     </section>
     <section>
@@ -129,59 +134,107 @@
         <label id="wall-unit-cost-label"></label>
         <button id="submit-btn" onclick="calculatewalling()">submit</button>
         <a href="#home-section">home</a>
-    <script>
-        function calculatemix(volume,ratio,factor,cementPrice,sandPrice,ballastPrice=0){
-            const mix = getRatio(ratio);
-            const cementratio = mix[0];
-            const sandratio = mix[1];
-            const ballastRatio = mix[2]||0;
-            const ratioSum = cementratio+sandratio+ballastRatio;
-            
-            const dryVolume = volume*factor;
-            const cement= cementratio*dryVolume*28.96/ratioSum;
-            const sand = sandratio* dryVolume*1.8/ratioSum
-            const ballast = ballastRatio*dryVolume*2.2/ratioSum;
-            const cementCost = Math.ceil(cement*cementPrice);
-            const sandCost = Math.ceil(sandPrice*sand);
-            const ballastCost = Math.ceil(ballastPrice*ballast);
-            const materialCost = cementCost+sandCost+ballastCost;
-            return materialCost
-        }
-        function calculatewalling() {
-            const block = document.getElementById("blocks-select").value;
-            const morta = document.getElementById("morta-select").value;
-            const blockPrice = parseFloat(document.getElementById("block-price").value);
-            const cementPrice = parseFloat(document.getElementById("cement-price-input").value);
-            const sandPrice = parseFloat(document.getElementById("sand-price-per-ton").value);
-            const laborPercent = parseFloat(document.getElementById("labor-text").value);
-            const blocks = calculateBlock(block,blockPrice)
-            const mortaMix=calculatemix(
-                blocks[1],
-                morta,
-                1.3,
-                cementPrice,
-                sandPrice
+        <script>
+            function calculatemix(volume, ratio, factor, cementPrice, sandPrice, ballastPrice = 0) {
+                const mix = getRatio(ratio);
+                const cementratio = mix[0];
+                const sandratio = mix[1];
+                const ballastRatio = mix[2] || 0;
+                const ratioSum = cementratio+sandratio+ballastRatio;
+
+                const dryVolume = volume*factor;
+                const cement = cementratio*dryVolume*28.96/ratioSum;
+                const sand = sandratio* dryVolume*1.8/ratioSum
+                const ballast = ballastRatio*dryVolume*2.2/ratioSum;
+                const cementCost = Math.ceil(cement*cementPrice);
+                const sandCost = Math.ceil(sandPrice*sand);
+                const ballastCost = Math.ceil(ballastPrice*ballast);
+                const materialCost = cementCost+sandCost+ballastCost;
+                return materialCost
+            }
+            function calculatewalling() {
+                const block = document.getElementById("blocks-select").value;
+                const morta = document.getElementById("morta-select").value;
+                const blockPrice = parseFloat(document.getElementById("block-price").value);
+                const cementPrice = parseFloat(document.getElementById("cement-price-input").value);
+                const sandPrice = parseFloat(document.getElementById("sand-price-per-ton").value);
+                const laborPercent = parseFloat(document.getElementById("labor-text").value);
+                const blocks = calculateBlock(block, blockPrice)
+                const mortaMix = calculatemix(
+                    blocks[1],
+                    morta,
+                    1.3,
+                    cementPrice,
+                    sandPrice
                 )
-            const materialCost = mortaMix+blocks[0]
-            const laborCost = Math.ceil(materialCost*laborPercent/100)
-            unitCost = laborCost+materialCost
-            document.getElementById("wall-unit-cost-label").innerHTML=`WALLING COST PER SQUARE METER = ${unitCost}/=`}
-        function calculateBlock(block,price){
-            const blockMeasurements = getBlockMeasurements(block);
-            const lengthOfBlock = blockMeasurements[0];
-            const widthOfBlock = blockMeasurements[1];
-            const heightOfBlock = blockMeasurements[2];
-            const builtBlockLength = (lengthOfBlock+20)/1000;
-            const builtBlockHeight = (heightOfBlock+20)/1000;
-            const blockArea = builtBlockLength*builtBlockHeight;
-            const blocks = Math.ceil(1/blockArea)
-            const blockVolume = blocks*lengthOfBlock*widthOfBlock*heightOfBlock/1000000000;
-            const wallVolume = 1*widthOfBlock/1000;
-            const mortaVolume = wallVolume-blockVolume;
-            const cost = blocks*price;
-            return [cost,mortaVolume]
-        }
-    </script>
+                const materialCost = mortaMix+blocks[0]
+                const laborCost = Math.ceil(materialCost*laborPercent/100)
+                unitCost = laborCost+materialCost
+                document.getElementById("wall-unit-cost-label").innerHTML = `WALLING COST PER SQUARE METER = ${unitCost}/=`
+            }
+            function calculateBlock(block, price) {
+                const blockMeasurements = getBlockMeasurements(block);
+                const lengthOfBlock = blockMeasurements[0];
+                const widthOfBlock = blockMeasurements[1];
+                const heightOfBlock = blockMeasurements[2];
+                const builtBlockLength = (lengthOfBlock+20)/1000;
+                const builtBlockHeight = (heightOfBlock+20)/1000;
+                const blockArea = builtBlockLength*builtBlockHeight;
+                const blocks = Math.ceil(1/blockArea)
+                const blockVolume = blocks*lengthOfBlock*widthOfBlock*heightOfBlock/1000000000;
+                const wallVolume = 1*widthOfBlock/1000;
+                const mortaVolume = wallVolume-blockVolume;
+                const cost = blocks*price;
+                return [cost,
+                    mortaVolume]
+            }
+        </script>
+    </section>
+    <section id="concrete-section">
+        <h2>
+            Concrete Per M³
+        </h2>
+        <h3>Volume in M³</h3>
+        <input type="number" placeholder="1" id="concrete-volume">
+        <h3>Concrete Mix Ratio</h3>
+        <select id="concrete-ratio">
+            <option value="1:1.5:3">1:1.5:3</option>
+            <option value="1:2:4">1:2:4</option>
+            <option value="1:3:5">1:3:5</option>
+            <option value="1:4:8">1:4:8</option>
+        </select>
+        <h3>Cement price per Bag</h3>
+        <input id="concrete-cement-price-input" placeholder="850" type="number">
+        <h3>Sand Price Per Ton</h3>
+        <input id="concrete-sand-price-per-ton" placeholder="1350" type="number">
+        <h3>ballast Price Per Ton</h3>
+        <input id="ballast-price-per-ton" placeholder="2500" type="number">
+        <h3>Labor percent of Material Cost</h3>
+        <input id="concrete-labor-text" placeholder="40" type="number">
+        <h3>Equipment Cost</h3>
+        <input id="concrete-equipment-text" placeholder="12000" type="number">
+        <label id="concrete-unit-cost-label"></label>
+        <button id="submit-btn" onclick="calculateConcrete()">submit</button>
+        <a href="#home-section">home</a>
+        <script>
+            function calculateConcrete() {
+                const volume = parseFloat(document.getElementById("concrete-volume"))
+                const cementPrice = parseFloat(document.getElementById("concrete-cement-price-input").value);
+                const sandPrice = parseFloat(document.getElementById("concrete-sand-price-per-ton").value);
+                const ballastPrice = parseFloat(document.getElementById("ballast-price-per-ton").value);
+                const laborPercent = parseFloat(document.getElementById("concrete-labor-text").value);
+                const ratio = document.getElementById("concrete-ratio").value
+                const concreteMix = calculatemix(
+                    volume,
+                    ratio,
+                    1.54,
+                    cementPrice,
+                    sandPrice,
+                    ballastPrice
+                )
+                document.getElementById("concrete-labor-text").innerHTML=concreteMix
+            }
+        </script>
     </section>
 </body>
 </html>
