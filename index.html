@@ -218,7 +218,8 @@
         <a href="#home-section">home</a>
         <script>
             function calculateConcrete() {
-                const volume = parseFloat(document.getElementById("concrete-volume"))
+                const volume = parseFloat(document.getElementById("concrete-volume").value)
+                const equipmentCost = parseFloat(document.getElementById("concrete-equipment-text").value)
                 const cementPrice = parseFloat(document.getElementById("concrete-cement-price-input").value);
                 const sandPrice = parseFloat(document.getElementById("concrete-sand-price-per-ton").value);
                 const ballastPrice = parseFloat(document.getElementById("ballast-price-per-ton").value);
@@ -232,7 +233,11 @@
                     sandPrice,
                     ballastPrice
                 )
-                document.getElementById("concrete-labor-text").innerHTML=concreteMix
+                laborCost = laborPercent*concreteMix/100;
+                const totalCost = concreteMix+equipmentCost+laborCost;
+                const unitCost = Math.ceil(totalCost/volume)
+                const description = `Labor cost:${laborCost}\nEquipment Cost:${equipmentCost}\nMaterial Cost:${concreteMix}\nTotal Cost:${totalCost}\nUnit Cost:${unitCost}`
+                document.getElementById("concrete-unit-cost-label").innerHTML = description;
             }
         </script>
     </section>
