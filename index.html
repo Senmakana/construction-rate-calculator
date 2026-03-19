@@ -4,10 +4,42 @@
     <title>construction rates application</title>
     <style>
         * {
-    box-sizing: border-box;
-}
+            box-sizing: border-box;
+        }
         body {
             font-family: "roboti" Sans-Serif;
+            font-weight: bold;
+        }
+        #home-section {
+            background-image: url('con1.jpg');
+            background-size: cover;
+            background-position: center;
+            min-height: 400px;
+            color: white;
+        }
+        #about-section {
+            background-image: url('construction02.jpg');
+            background-size: cover;
+            background-position: center;
+            min-height: 400px;
+        }
+        #walling-section {
+            background-image: url('block.jpg');
+            background-size: 100%;
+            background-position: center;
+            min-height: 400px;
+        }
+        #concrete-section {
+            background-image: url('concrete.jpg');
+            background-size: cover;
+            background-position: center;
+            min-height: 400px;
+        }
+        #plaster-section {
+            background-image: url('plaster.jpg');
+            background-size: cover;
+            background-position: center;
+            min-height: 400px;
         }
         select {
             width: 100%;
@@ -79,7 +111,7 @@
             <a href="#concrete-section">Concrete</a>
         </nav>
     </section>
-    <section>
+    <section id="about-section">
         <h2>About Us</h2>
         <p>
             This application was developed by Eric Nyongesa, a trained architect with a strong interest in construction technology and practical site solutions.
@@ -238,6 +270,54 @@
                 const unitCost = Math.ceil(totalCost/volume)
                 const description = `Labor cost:${laborCost}\nEquipment Cost:${equipmentCost}\nMaterial Cost:${concreteMix}\nTotal Cost:${totalCost}\nUnit Cost:${unitCost}`
                 document.getElementById("concrete-unit-cost-label").innerHTML = description;
+            }
+        </script>
+    </section>
+    <section id="plaster-section">
+        <h2>
+            PLASTER
+        </h2>
+        <h3>Area in m²</h3>
+        <input type="number" placeholder="1" id="plaster-area-input">
+        <h3>Plaster Thickness in mm</h3>
+        <input placeholder="50" type="number" id="plaster-thickness-input">
+        <h3>Plaster Mix Ratio</h3>
+        <select id="plaster-ratio">
+            <option value="1:1.5">1:1.5</option>
+            <option value="1:2">1:2</option>
+            <option value="1:3">1:3</option>
+            <option value="1:4">1:4</option>
+        </select>
+        <h3>Cement price per Bag</h3>
+        <input id="plaster-cement-price-input" placeholder="850" type="number">
+        <h3>Sand Price Per Ton</h3>
+        <input id="plaster-sand-price-per-ton" placeholder="1350" type="number">
+        <h3>Labor percent of Material Cost</h3>
+        <input id="plaster-labor-text" placeholder="40" type="number">
+        <label id="plaster-unit-cost-label"></label>
+        <button id="submit-btn" onclick="calculatePlaster()">submit</button>
+        <a href="#home-section">home</a>
+        <script>
+            function calculatePlaster() {
+                const area = parseFloat(document.getElementById("plaster-area-input").value)
+                const thickness = parseFloat(document.getElementById("plaster-thickness-input").value)
+                const cementPrice = parseFloat(document.getElementById("plaster-cement-price-input").value);
+                const sandPrice = parseFloat(document.getElementById("plaster-sand-price-per-ton").value);
+                const laborPercent = parseFloat(document.getElementById("plaster-labor-text").value);
+                const ratio = document.getElementById("plaster-ratio").value
+                const volume = area*thickness/1000;
+                const plasterMix = calculatemix(
+                    volume,
+                    ratio,
+                    1.3,
+                    cementPrice,
+                    sandPrice
+                )
+                laborCost = laborPercent*plasterMix/100;
+                const totalCost = plasterMix+laborCost;
+                const unitCost = Math.ceil(totalCost/area)
+                const description = `Labor cost:${laborCost}\nMaterial Cost:${plasterMix}\nTotal Cost:${totalCost}\nUnit Cost:${unitCost}`
+                document.getElementById("plaster-unit-cost-label").innerHTML = description;
             }
         </script>
     </section>
