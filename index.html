@@ -1,24 +1,28 @@
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>construction rates application</title>
+    <title>mjengo app</title>
     <style>
         * {
             box-sizing: border-box;
         }
         body {
-            font-family: "roboti" Sans-Serif;
+            font-family: "roboto" Sans-Serif;
             font-weight: bold;
         }
         select {
             width: 100%;
             height: 50px;
             font-size: 20px;
+            border: solid;
+            border-radius: 10px;
         }
         input {
             width: 100%;
             height: 50px;
             font-size: 20px;
+            border: solid;
+            border-radius: 10px;
         }
         h3 {
             display: block;
@@ -41,13 +45,16 @@
             font-weight: bold;
             font-size: 12px;
             margin-left: 15px;
+            color: black;
         }
         button {
             width: 100%;
             height: 50px;
             border: none;
             border-radius: 15px;
-            background-color: #60ebda;
+            background-color: black;
+            color: white;
+            font-weight: bold;
             display: block;
             margin-top: 20px;
             margin-bottom: 20px;
@@ -61,7 +68,11 @@
 </head>
 <body>
     <section id="home-section">
-        <h1>BUILDING CONSTRUCTION RATES</h1>
+        <h1>MJENGO APP</h1>
+        <nav>
+            <a href="#about-section">About the Developer</a>
+            <a href="#calculations-section">Calculator</a>
+        </nav>
         <h2>Introduction</h2>
         <p>
             Welcome to the Construction Rate Calculator
@@ -74,12 +85,6 @@
             Automatically calculate the rate per square meter of the work.
             The goal is to simplify calculations, reduce estimation errors, and help contractors make faster and more accurate cost decisions on site.
         </p>
-        <nav>
-            <a href="#about-section">About the Developer</a>
-            <a href="#walling-section">wall</a>
-            <a href="#concrete-section">Concrete</a>
-            <a href="#plaster-section">plaster</a>
-        </nav>
     </section>
     <section id="about-section">
         <h2>About Us</h2>
@@ -91,6 +96,36 @@
         <a href="#home-section">home</a>
     </section>
     <script>
+        function calculateColumnFoundationBarLength(width,depth,cover){
+            const bend = depth-2*cover;
+            const span = width-2*cover;
+            const bar = span+2*bend;
+            return bar
+        }
+        function calculateColumnFoundationBarNumber(cover,length,number,spacing){
+            const span = length-cover-cover;
+            const spaces = Math.ceil(span/spacing)
+            const bars = spaces+1;
+            return bars*number
+        }
+        function calculateLinksLength(width, depth, cover, bar) {
+            const length = width-(2*cover);
+            const height = depth-(2*cover);
+            const bends = bar*12.5*2;
+            const perimeter = 2*(length+height);
+            return perimeter+bends
+        }
+        function calculateNumberOfLinkBar(length, number, spacing) {
+            const numberPerStructure = Math.ceil(length/spacing);
+            return numberPerStructure*number
+        }
+        function calculateBars(length, number) {
+            const numberOfBarsInFullBar = Math.floor(12000/length);
+            const fullBars = Math.ceil(number/numberOfBarsInFullBar)
+            const remainingBars = 12000%length;
+            return [number,
+                fullBars,
+                remainingBars]}
         function convertStringListItemsToFloats(itemList) {
             let floats = itemList.map(n => parseFloat(n));
 
@@ -109,17 +144,38 @@
             return getInfoFromData(ratio, ":")
         }
     </script>
+    <section id="calculations-section">
+        <nav>
+            <a href="#home-section">Home</a>
+            <a href="#walling-section">wall</a>
+            <a href="#concrete-section">Concrete</a>
+            <a href="#plaster-section">Plaster</a>
+            <a href="#steel-section">Reinforcements</a>
+        </nav>
+        <h2>CALCULATIONS</h2>
+        <h3>Currency</h3>
+        <select id="currency-select">
+            <option value="Ksh">Ksh</option>
+            <option value="Tsh">Tsh</option>
+            <option value="Ugx">Ugx</option>
+            <option value="Usd">Usd</option>
+            <option value="Eur">Eur</option>
+            <option value="Gbp">Gbp</option>
+        </select>
+    </section>
     <section id="walling-section">
-        <h2>BLOCK AND MORTA WALL PER M²</h2>
+        <h2>WALLING</h2>
+        <h3>Area in Square Meters</h3>
+        <input placeholder="100" id="wall-area-input" type="number">
         <h3>Building Block Sizes</h3>
         <select id="blocks-select">
-            <option value="">choose building block size</option>
             <option value="300x150x150">300x150x150</option>
             <option value="360x180x180">360x180x180</option>
             <option value="400x200x200">400x200x200</option>
         </select>
         <h3>Mortar Ratio</h3>
         <select id="morta-select">
+            <option value="1:1.5">1:1.5</option>
             <option value="1:2">1:2</option>
             <option value="1:3">1:3</option>
             <option value="1:4">1:4</option>
@@ -135,9 +191,9 @@
         <input id="labor-text" placeholder="40" type="number">
         <label id="wall-unit-cost-label"></label>
         <button id="submit-btn" onclick="calculatewalling()">submit</button>
-        <a href="#home-section">home</a>
+        <a href="#calculations-section">home</a>
         <script>
-            function calculatemix(volume, ratio, factor, cementPrice, sandPrice, ballastPrice = 0) {
+            function calculatemix(currency,volume, ratio, factor, cementPrice, sandPrice, ballastPrice = 0) {
                 const mix = getRatio(ratio);
                 const cementratio = mix[0];
                 const sandratio = mix[1];
@@ -145,36 +201,51 @@
                 const ratioSum = cementratio+sandratio+ballastRatio;
 
                 const dryVolume = volume*factor;
-                const cement = cementratio*dryVolume*28.96/ratioSum;
-                const sand = sandratio* dryVolume*1.8/ratioSum
-                const ballast = ballastRatio*dryVolume*2.2/ratioSum;
+                const cement = Math.ceil(cementratio*dryVolume*28.96/ratioSum);
+                console.log(`cement = ${cement} bags`)
+                const sand = Math.ceil(sandratio* dryVolume*1.8/ratioSum);
+                console.log(`sand = ${sand} tons`)
+                const ballast = Math.ceil(ballastRatio*dryVolume*2.2/ratioSum);
+                console.log(`ballast = ${ballast} tons`)
                 const cementCost = Math.ceil(cement*cementPrice);
                 const sandCost = Math.ceil(sandPrice*sand);
                 const ballastCost = Math.ceil(ballastPrice*ballast);
                 const materialCost = cementCost+sandCost+ballastCost;
-                return materialCost
+                const cementDescription = `Cement...${cement}...bags...${currency}.${cementPrice}...${currency}.${cementCost}`;
+                const sandDescription = `Sand...${sand}...tons...${currency}.${sandPrice}...${currency}.${sandCost}`;
+                const ballasDescription = `Ballast...${ballast}...tons...${currency}.${ballastPrice}...${currency}.${ballastCost}`
+                return [materialCost,cementDescription,sandDescription,ballasDescription]
             }
             function calculatewalling() {
+                const area = parseFloat(document.getElementById("wall-area-input").value)
                 const block = document.getElementById("blocks-select").value;
                 const morta = document.getElementById("morta-select").value;
                 const blockPrice = parseFloat(document.getElementById("block-price").value);
                 const cementPrice = parseFloat(document.getElementById("cement-price-input").value);
                 const sandPrice = parseFloat(document.getElementById("sand-price-per-ton").value);
                 const laborPercent = parseFloat(document.getElementById("labor-text").value);
-                const blocks = calculateBlock(block, blockPrice)
+                currency = document.getElementById("currency-select").value;
+                const blocks = calculateBlock(area,block, blockPrice,currency)
                 const mortaMix = calculatemix(
+                    currency,
                     blocks[1],
                     morta,
                     1.3,
                     cementPrice,
                     sandPrice
                 )
-                const materialCost = mortaMix+blocks[0]
+                const materialCost = mortaMix[0]+blocks[0]
                 const laborCost = Math.ceil(materialCost*laborPercent/100)
-                unitCost = laborCost+materialCost
-                document.getElementById("wall-unit-cost-label").innerHTML = `WALLING COST PER SQUARE METER = ${unitCost}/=`
+                const totalCost = laborCost+materialCost;
+                const unitCost = Math.ceil(totalCost/area);
+                const description = `${blocks[2]}<br>${mortaMix[1]}<br>${mortaMix[2]}<br>Materials...${currency}.${materialCost}<br>labor...${currency}.${laborCost}<br>Total cost...${currency}.${totalCost}<br>Unit Cost...${currency}.${unitCost}`
+                document.getElementById("wall-unit-cost-label").innerHTML = description
             }
-            function calculateBlock(block, price) {
+            function calculateBlock(area,block, price,currency) {
+                console.log(`area
+                = ${area}m²`)
+                console.log(`block = ${block}`)
+                console.log(`price = ${price}`)
                 const blockMeasurements = getBlockMeasurements(block);
                 const lengthOfBlock = blockMeasurements[0];
                 const widthOfBlock = blockMeasurements[1];
@@ -182,19 +253,21 @@
                 const builtBlockLength = (lengthOfBlock+20)/1000;
                 const builtBlockHeight = (heightOfBlock+20)/1000;
                 const blockArea = builtBlockLength*builtBlockHeight;
-                const blocks = Math.ceil(1/blockArea)
+                const blocks = Math.ceil(area/blockArea)
+                console.log(`blocks = ${blocks} pcs`)
                 const blockVolume = blocks*lengthOfBlock*widthOfBlock*heightOfBlock/1000000000;
-                const wallVolume = 1*widthOfBlock/1000;
+                const wallVolume = area*widthOfBlock/1000;
                 const mortaVolume = wallVolume-blockVolume;
                 const cost = blocks*price;
+                blockDescription = `${block} blocks...${blocks}...pcs...${currency}.${price}...${currency}.${cost}`
                 return [cost,
-                    mortaVolume]
+                    mortaVolume,blockDescription]
             }
         </script>
     </section>
     <section id="concrete-section">
         <h2>
-            Concrete Per M³
+            CONCRETE
         </h2>
         <h3>Volume in M³</h3>
         <input type="number" placeholder="1" id="concrete-volume">
@@ -217,7 +290,7 @@
         <input id="concrete-equipment-text" placeholder="12000" type="number">
         <label id="concrete-unit-cost-label"></label>
         <button id="submit-btn" onclick="calculateConcrete()">submit</button>
-        <a href="#home-section">home</a>
+        <a href="#calculations-section">home</a>
         <script>
             function calculateConcrete() {
                 const volume = parseFloat(document.getElementById("concrete-volume").value)
@@ -227,7 +300,9 @@
                 const ballastPrice = parseFloat(document.getElementById("ballast-price-per-ton").value);
                 const laborPercent = parseFloat(document.getElementById("concrete-labor-text").value);
                 const ratio = document.getElementById("concrete-ratio").value
+                currency = document.getElementById("currency-select").value
                 const concreteMix = calculatemix(
+                    currency,
                     volume,
                     ratio,
                     1.54,
@@ -235,10 +310,10 @@
                     sandPrice,
                     ballastPrice
                 )
-                laborCost = laborPercent*concreteMix/100;
-                const totalCost = concreteMix+equipmentCost+laborCost;
+                laborCost = laborPercent*concreteMix[0]/100;
+                const totalCost = concreteMix[0]+equipmentCost+laborCost;
                 const unitCost = Math.ceil(totalCost/volume)
-                const description = `Labor cost:${laborCost}\nEquipment Cost:${equipmentCost}\nMaterial Cost:${concreteMix}\nTotal Cost:${totalCost}\nUnit Cost:${unitCost}`
+                const description = `${concreteMix[1]}<br>${concreteMix[2]}<br>${concreteMix[3]}<br>Material cost...${currency}.${concreteMix[0]}<br>Labor cost...${currency}.${laborCost}<br>Equipment Cost...${currency}.${equipmentCost}<br>Total Cost...${currency}.${totalCost}<br>Unit Cost...${currency}.${unitCost}`
                 document.getElementById("concrete-unit-cost-label").innerHTML = description;
             }
         </script>
@@ -266,7 +341,7 @@
         <input id="plaster-labor-text" placeholder="40" type="number">
         <label id="plaster-unit-cost-label"></label>
         <button id="submit-btn" onclick="calculatePlaster()">submit</button>
-        <a href="#home-section">home</a>
+        <a href="#calculations-section">home</a>
         <script>
             function calculatePlaster() {
                 const area = parseFloat(document.getElementById("plaster-area-input").value)
@@ -274,20 +349,161 @@
                 const cementPrice = parseFloat(document.getElementById("plaster-cement-price-input").value);
                 const sandPrice = parseFloat(document.getElementById("plaster-sand-price-per-ton").value);
                 const laborPercent = parseFloat(document.getElementById("plaster-labor-text").value);
-                const ratio = document.getElementById("plaster-ratio").value
+                const ratio = document.getElementById("plaster-ratio").value;
+                currency = document.getElementById("currency-select").value
                 const volume = area*thickness/1000;
                 const plasterMix = calculatemix(
+                    currency,
                     volume,
                     ratio,
                     1.3,
                     cementPrice,
                     sandPrice
                 )
-                laborCost = laborPercent*plasterMix/100;
-                const totalCost = plasterMix+laborCost;
+                laborCost = laborPercent*plasterMix[0]/100;
+                const totalCost = plasterMix[0]+laborCost;
                 const unitCost = Math.ceil(totalCost/area)
-                const description = `Labor cost:${laborCost}\nMaterial Cost:${plasterMix}\nTotal Cost:${totalCost}\nUnit Cost:${unitCost}`
+                const description = `${plasterMix[1]}<br>${plasterMix[2]}<br>Material cost...${currency}.${plasterMix[0]}<br>Labor cost...${currency}.${laborCost}<br>Total Cost...${currency}.${totalCost}<br>Unit Cost...${currency}.${unitCost}`
                 document.getElementById("plaster-unit-cost-label").innerHTML = description;
+            }
+        </script>
+    </section>
+    <section id="steel-section">
+        <a href="#calculations-section">Home</a>
+        <a href="#steel-cost-per-unit-weight-section">Cost</a>
+        <a href="#bars-section">Bars</a>
+        <a href="#links-section">links</a>
+        <a href="#column-foundation-section">column foundations</a>
+        <h2>REINFORCEMENTS</h2>
+    </section>
+    <section id="steel-cost-per-unit-weight-section">
+        <h3>Steel Bar Size</h3>
+        <select id="steel-bar-select">
+            <option value="8">D8</option>
+            <option value="10">D10</option>
+            <option value="12">D12</option>
+            <option value="16">D16</option>
+            <option value="20">D20</option>
+            <option value="25">D25</option>
+            <option value="32">D32</option>
+        </select>
+        <h3>Quantity</h3>
+        <input placeholder="1" type="number" id="bar-number">
+        <h3>Price Per Piece</h3>
+        <input type="number" placeholder="1" id="steel-price">
+        <h3>Labor Percent of Materials</h3>
+        <input id="steel-bar-labor-input" type="number" placeholder="40">
+        <label id="steel-unit-label"></label>
+        <button onclick="calculateSteelPricePerUnitWeight()">Submit</button>
+        <script>
+            function calculateSteelPricePerUnitWeight() {
+                const barSize = parseInt(document.getElementById("steel-bar-select").value);
+                const quantity = parseFloat(document.getElementById("bar-number").value);
+                const price = parseFloat(document.getElementById("steel-price").value);
+                const labor = parseFloat(document.getElementById("steel-bar-labor-input").value)
+                const label = document.getElementById("steel-unit-label")
+                const radius = barSize/2000;
+                const weight = Math.PI*12*7850*quantity*radius**2;
+                const bindingWire = Math.ceil(weight*13/1000);
+                const cost = price*quantity;
+                const materialUnitCost = Math.ceil(cost/weight);
+                const laborUnitCost = materialUnitCost*labor/100
+                const steelUnitCost = materialUnitCost+laborUnitCost;
+                const totalCost = Math.ceil(weight*steelUnitCost);
+                currency = document.getElementById("currency-select").value
+                const description = `steel bar weight = ${Math.ceil(weight)}kg\nbinding wire = ${bindingWire}kg\nsteel bar unit cost = ${currency}.${materialUnitCost} per kg\n steel bar labor = ${currency}.${laborUnitCost} per kg\nD${barSize}...${Math.ceil(weight)}...kg...${currency}.${steelUnitCost}..${currency}${totalCost}`
+                label.innerHTML = description;
+            }
+        </script>
+        <a href="#steel-section">home</a>
+    </section>
+    <section id="bars-section">
+        <h2>FULL BARS</h2>
+        <h3>Bar Length in mm</h3>
+        <input type="number" placeholder="4000" id="bar-length-input">
+        <h3>Number</h3>
+        <input type="number" placeholder="6" id="bar-number-input">
+        <label id="bar-number-label"></label>
+        <button onclick="calculateFullBars()">Submit</button>
+        <a id="#steel-section">home</a>
+        <script>
+            function calculateFullBars() {
+                const length = parseFloat(document.getElementById("bar-length-input").value);
+                const number = parseInt(document.getElementById("bar-number-input").value);
+                const bars = calculateBars(length, number)
+                const description = `full bars = ${bars[1]} no\nOff cuts = ${bars[0]} pcs each ${bars[2]}mm`
+                document.getElementById("bar-number-label").innerHTML = description
+            }
+        </script>
+    </section>
+    <section id="links-section">
+        <h2>LINKS</h2>
+        <h3>cover in mm</h3>
+        <input placeholder="50" type="number" id="cover-input">
+        <h3>length in mm</h3>
+        <input type="number" id="length-input" placeholder="3000">
+        <h3>Width in mm</h3>
+        <input type="number" id="width-input" placeholder="200">
+        <h3>Depth in mm</h3>
+        <input type="number" id="depth-input" placeholder="300">
+        <h3>Number ofStructure</h3>
+        <input type="number" id="number-input" placeholder="1">
+        <h3>Spacing in mm</h3>
+        <input id="spacing-input" type="number" placeholder="200">
+        <label id="ring-bar-number-label"></label>
+        <button onclick="getRings()">submit</button>
+        <a href="#steel-section">home</a>
+        <script>
+            function getRings() {
+                const cover = parseFloat(document.getElementById("cover-input").value);
+                const length = parseFloat(document.getElementById("length-input").value);
+                const width = parseFloat(document.getElementById("width-input").value);
+                const depth = parseFloat(document.getElementById("depth-input").value);
+                const spacing = parseFloat(document.getElementById("spacing-input").value);
+                const number = parseFloat(document.getElementById("number-input").value)
+                bar = parseInt(document.getElementById("steel-bar-select").value)
+                const ringLength = calculateLinksLength(width, depth, cover, bar);
+                const linksNumber = calculateNumberOfLinkBar(length, number, spacing);
+                const bars = calculateBars(ringLength, linksNumber)
+                const description = `full bars = ${bars[1]} no\nOff cuts = ${bars[0]} pcs each ${bars[2]}mm`
+                document.getElementById("ring-bar-number-label").innerHTML = description
+            }
+        </script>
+    </section>
+    <section id="column-foundation-section">
+        <h2>COLUMN FOUNDATION REBAR</h2>
+        <h3>Cover in mm</h3>
+        <input type="number" id="column-foundation-cover-input" placeholder="50">
+        <h3>length in mm</h3>
+        <input type="number" id="column-foundation-length-input" placeholder="1200">
+        <h3>Width in mm</h3>
+        <input type="number" id="column-foundation-width-input" placeholder="1200">
+        <h3>Depth in mm</h3>
+        <input type="number" id="column-foundation-depth-input" placeholder="350">
+        <h3>number of columns</h3>
+        <input type="number" id="column-foundation-number-input" placeholder="1">
+        <h3>Spacing in mm</h3>
+        <input type="number" id="column-foundation-spacing-input" placeholder="200">
+        <label id="column-foundation-label"></label>
+        <button onclick="calculateColumnFoundationRebar()">Submit</button>
+        <a href="#steel-section">home</a>
+        <script>
+            function calculateColumnFoundationRebar(){
+                const cover = parseFloat(document.getElementById("column-foundation-cover-input").value);
+                const length = parseFloat(document.getElementById("column-foundation-length-input").value)
+                const width = parseFloat(document.getElementById("column-foundation-width-input").value)
+                const depth = parseFloat(document.getElementById("column-foundation-depth-input").value)
+                const number = parseFloat(document.getElementById("column-foundation-number-input").value)
+                const spacing = parseFloat(document.getElementById("column-foundation-spacing-input").value)
+            const bottomBar = calculateColumnFoundationBarLength(width,depth,cover)
+                console.log(bottomBar)
+            const topBar = calculateColumnFoundationBarLength(length,depth,cover)
+            const bottoms = calculateColumnFoundationBarNumber(cover,length,number,spacing)
+            const tops = calculateColumnFoundationBarNumber(cover,width,number,spacing)
+            const bottomBars = calculateBars(bottomBar,bottoms)
+            const topBars = calculateBars(topBar,tops)
+            const description = `tops:${topBars[1]} pcs <br> ${tops}pcs@${topBar}mm long<br>bottoms:${bottomBars[1]} pcs<br>${bottoms}@${bottomBar}mm long`
+            document.getElementById("column-foundation-label").innerHTML=description
             }
         </script>
     </section>
